@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { TimerDisplay } from './timer-display'
-import type { SessionType } from '@/features/pomodoro/types/pomodoro'
 
 describe('TimerDisplay', () => {
   it('should render formatted time correctly', () => {
@@ -45,10 +44,10 @@ describe('TimerDisplay', () => {
       <TimerDisplay timeRemaining={300} sessionType="work" />
     )
 
-    const workClasses = container.firstChild?.className
+    const workClasses = (container.firstChild as HTMLElement)?.className
 
     rerender(<TimerDisplay timeRemaining={300} sessionType="short-break" />)
-    const breakClasses = container.firstChild?.className
+    const breakClasses = (container.firstChild as HTMLElement)?.className
 
     expect(workClasses).not.toBe(breakClasses)
   })

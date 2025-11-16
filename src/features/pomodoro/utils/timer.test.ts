@@ -5,7 +5,7 @@ import {
   getDefaultSettings,
   getDurationForSessionType,
 } from './timer'
-import type { SessionType, PomodoroSettings } from '../types/pomodoro'
+import type { PomodoroSettings } from '../types/pomodoro'
 
 describe('timer utilities', () => {
   const mockSettings: PomodoroSettings = {

@@ -13,7 +13,7 @@ describe('useTimer', () => {
 
   it('should call onTick every second when running', () => {
     const onTick = vi.fn()
-    const { result } = renderHook(() => useTimer({ isRunning: true, onTick }))
+    renderHook(() => useTimer({ isRunning: true, onTick }))
 
     expect(onTick).not.toHaveBeenCalled()
 

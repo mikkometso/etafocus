@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { TimerControls } from './timer-controls'
-import type { TimerState } from '@/features/pomodoro/types/pomodoro'
 
 describe('TimerControls', () => {
   it('should render start button when timer is idle', () => {
