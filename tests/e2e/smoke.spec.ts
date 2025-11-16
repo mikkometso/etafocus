@@ -21,6 +21,12 @@ test.describe('EtaFocus Smoke Tests', () => {
     await expect(page.getByRole('button', { name: /reset/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /reset/i })).toBeDisabled()
 
+    // Verify quick preset buttons exist
+    await expect(page.getByRole('button', { name: /^5 min$/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^10 min$/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^15 min$/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^25 min$/i })).toBeVisible()
+
     // Verify session info cards are visible
     await expect(page.getByText(/Completed Today/i)).toBeVisible()
     await expect(page.getByText(/Streak/i)).toBeVisible()
