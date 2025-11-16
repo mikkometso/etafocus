@@ -17,7 +17,7 @@ export type Todo = {
 export type TodoFilter = {
   status?: 'all' | 'active' | 'completed'
   priority?: TodoPriority | 'all'
-  category?: string | 'all'
+  category?: string
   searchQuery?: string
 }
 
