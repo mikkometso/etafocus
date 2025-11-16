@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+claude.md
 
 # Editor directories and files
 .vscode/*
@@ -31,3 +32,4 @@ coverage
 
 # PWA
 dev-dist
+
