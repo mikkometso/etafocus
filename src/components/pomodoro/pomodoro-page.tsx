@@ -4,6 +4,8 @@ import { calculateNextSessionType, getDurationForSessionType } from '@/features/
 import { TimerDisplay } from './timer-display'
 import { TimerControls } from './timer-controls'
 import { SessionInfo } from './session-info'
+import { QuickPresets } from './quick-presets'
+import type { PomodoroSettings } from '@/features/pomodoro/types/pomodoro'
 
 export function PomodoroPage() {
   const { state, dispatch } = usePomodoro()
@@ -44,6 +46,15 @@ export function PomodoroPage() {
     dispatch({ type: 'COMPLETE_SESSION' })
   }
 
+  const handlePresetSelect = (durationInMinutes: number) => {
+    const newSettings: PomodoroSettings = {
+      ...state.settings,
+      workDuration: durationInMinutes * 60, // Convert minutes to seconds
+    }
+    dispatch({ type: 'UPDATE_SETTINGS', payload: newSettings })
+    dispatch({ type: 'RESET_TIMER' })
+  }
+
   return (
     <div className="container mx-auto max-w-4xl p-8">
       <div className="flex flex-col gap-12">
@@ -60,6 +71,13 @@ export function PomodoroPage() {
           timeRemaining={state.timeRemaining}
           sessionType={state.currentSessionType}
           progress={progress}
+        />
+
+        {/* Quick Presets */}
+        <QuickPresets
+          currentWorkDuration={state.settings.workDuration}
+          onPresetSelect={handlePresetSelect}
+          disabled={state.timerState === 'running'}
         />
 
         {/* Timer Controls */}
