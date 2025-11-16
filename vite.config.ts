@@ -8,6 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/etafocus/',
   plugins: [
     react(),
     VitePWA({
@@ -21,8 +22,8 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
+        scope: '/etafocus/',
+        start_url: '/etafocus/',
         icons: [
           {
             src: 'vite.svg',
