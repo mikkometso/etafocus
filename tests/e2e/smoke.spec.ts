@@ -20,6 +20,7 @@ test.describe('EtaFocus Smoke Tests', () => {
     await expect(page.getByRole('button', { name: /start/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /reset/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /reset/i })).toBeDisabled()
+    await expect(page.getByRole('button', { name: /^skip$/i })).toBeVisible()
 
     // Verify quick preset buttons exist
     await expect(page.getByRole('button', { name: /^5 min$/i })).toBeVisible()
