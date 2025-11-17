@@ -72,12 +72,21 @@ See `claude.md` for detailed project structure and development guidelines.
 
 ### Current Features ✅
 - **Pomodoro Timer**
-  - 25-minute work sessions
-  - 5-minute short breaks
-  - 15-minute long breaks (every 4 pomodoros)
-  - Start/pause/reset controls
+  - Work sessions: 25 minutes (default)
+  - Short breaks: 5 minutes (default)
+  - Long breaks: 15 minutes (every 4 completed pomodoros)
+  - Start/pause/reset/skip controls
   - Visual progress indicator
   - Session tracking and statistics
+- **Quick Preset Badges**
+  - Work sessions: 5, 10, 15, 25 minute presets
+  - Break sessions: 5, 10, 15 minute presets
+  - Dynamically switch based on current session type
+  - One-click duration changes
+- **Skip Session Functionality**
+  - Skip any session (work or break) to move to the next
+  - Skipping long break resets cycle to ensure next break is short
+  - Respects auto-start settings
 - **Auto-transitions** between work and break sessions
 - **localStorage persistence** - your progress is saved
 - **Light/dark theme** support
@@ -87,7 +96,6 @@ See `claude.md` for detailed project structure and development guidelines.
 ### Planned Features 🚀
 - Todo list with task tracking
 - Link todos to pomodoro sessions
-- Customizable timer durations
 - Statistics and analytics dashboard
 - Sound alerts and notifications
 - Keyboard shortcuts
