@@ -9,6 +9,7 @@ describe('pomodoroReducer', () => {
     timerState: 'idle',
     timeRemaining: 25 * 60,
     pomodorosCompletedToday: 0,
+    workSessionsToday: 0,
     currentStreak: 0,
     sessions: [],
     settings: getDefaultSettings(),
@@ -117,7 +118,7 @@ describe('pomodoroReducer', () => {
   })
 
   describe('COMPLETE_SESSION', () => {
-    it('should increment pomodoros completed when finishing work session', () => {
+    it('should increment both counters when finishing work session', () => {
       const workDoneState: PomodoroState = {
         ...initialState,
         timerState: 'completed',
@@ -127,6 +128,7 @@ describe('pomodoroReducer', () => {
       const newState = pomodoroReducer(workDoneState, action)
 
       expect(newState.pomodorosCompletedToday).toBe(1)
+      expect(newState.workSessionsToday).toBe(1)
       expect(newState.currentSessionType).toBe('short-break')
       expect(newState.timeRemaining).toBe(5 * 60)
       expect(newState.timerState).toBe('idle')
@@ -138,11 +140,13 @@ describe('pomodoroReducer', () => {
         timerState: 'completed',
         timeRemaining: 0,
         pomodorosCompletedToday: 3,
+        workSessionsToday: 3,
       }
       const action: PomodoroAction = { type: 'COMPLETE_SESSION' }
       const newState = pomodoroReducer(fourthPomodoroState, action)
 
       expect(newState.pomodorosCompletedToday).toBe(4)
+      expect(newState.workSessionsToday).toBe(4)
       expect(newState.currentSessionType).toBe('long-break')
       expect(newState.timeRemaining).toBe(15 * 60)
     })
@@ -174,6 +178,133 @@ describe('pomodoroReducer', () => {
         },
       }
       const action: PomodoroAction = { type: 'COMPLETE_SESSION' }
+      const newState = pomodoroReducer(autoStartState, action)
+
+      expect(newState.timerState).toBe('running')
+    })
+  })
+
+  describe('SKIP_SESSION', () => {
+    it('should increment workSessionsToday but not pomodorosCompletedToday when skipping work', () => {
+      const workState: PomodoroState = {
+        ...initialState,
+        currentSessionType: 'work',
+        timerState: 'running',
+        pomodorosCompletedToday: 2,
+        workSessionsToday: 2,
+      }
+      const action: PomodoroAction = { type: 'SKIP_SESSION' }
+      const newState = pomodoroReducer(workState, action)
+
+      expect(newState.pomodorosCompletedToday).toBe(2) // unchanged
+      expect(newState.workSessionsToday).toBe(3) // incremented
+      expect(newState.currentSessionType).toBe('short-break')
+      expect(newState.timeRemaining).toBe(5 * 60)
+    })
+
+    it('should skip short break without changing either counter', () => {
+      const shortBreakState: PomodoroState = {
+        ...initialState,
+        currentSessionType: 'short-break',
+        timerState: 'running',
+        pomodorosCompletedToday: 2,
+        workSessionsToday: 2,
+      }
+      const action: PomodoroAction = { type: 'SKIP_SESSION' }
+      const newState = pomodoroReducer(shortBreakState, action)
+
+      expect(newState.pomodorosCompletedToday).toBe(2) // unchanged
+      expect(newState.workSessionsToday).toBe(2) // unchanged
+      expect(newState.currentSessionType).toBe('work')
+      expect(newState.timeRemaining).toBe(25 * 60)
+    })
+
+    it('should reset workSessionsToday to 0 when skipping long break', () => {
+      const longBreakState: PomodoroState = {
+        ...initialState,
+        currentSessionType: 'long-break',
+        timerState: 'running',
+        pomodorosCompletedToday: 4,
+        workSessionsToday: 4,
+      }
+      const action: PomodoroAction = { type: 'SKIP_SESSION' }
+      const newState = pomodoroReducer(longBreakState, action)
+
+      expect(newState.pomodorosCompletedToday).toBe(4) // unchanged
+      expect(newState.workSessionsToday).toBe(0) // reset to 0
+      expect(newState.currentSessionType).toBe('work')
+      expect(newState.timeRemaining).toBe(25 * 60)
+    })
+
+    it('should show long break after skipping 4 work sessions', () => {
+      // Start state
+      let state: PomodoroState = {
+        ...initialState,
+        currentSessionType: 'work',
+        timerState: 'idle',
+        pomodorosCompletedToday: 0,
+        workSessionsToday: 0,
+      }
+
+      // Skip work sessions 4 times
+      for (let i = 0; i < 4; i++) {
+        // Skip work
+        state = pomodoroReducer(state, { type: 'SKIP_SESSION' })
+        expect(state.currentSessionType).toBe(i < 3 ? 'short-break' : 'long-break')
+
+        if (i < 3) {
+          // Skip break (except for last one)
+          state = pomodoroReducer(state, { type: 'SKIP_SESSION' })
+          expect(state.currentSessionType).toBe('work')
+        }
+      }
+
+      // After 4 skipped work sessions
+      expect(state.pomodorosCompletedToday).toBe(0) // No completed pomodoros
+      expect(state.workSessionsToday).toBe(4) // 4 work sessions (skipped)
+      expect(state.currentSessionType).toBe('long-break') // Should be long break
+    })
+
+    it('should ensure next break is short after skipping long break', () => {
+      // Skip long break
+      const longBreakState: PomodoroState = {
+        ...initialState,
+        currentSessionType: 'long-break',
+        timerState: 'running',
+        pomodorosCompletedToday: 4,
+        workSessionsToday: 4,
+      }
+      const skipAction: PomodoroAction = { type: 'SKIP_SESSION' }
+      const afterSkip = pomodoroReducer(longBreakState, skipAction)
+
+      expect(afterSkip.pomodorosCompletedToday).toBe(4) // unchanged
+      expect(afterSkip.workSessionsToday).toBe(0) // reset
+      expect(afterSkip.currentSessionType).toBe('work')
+
+      // Complete work session
+      const completeAction: PomodoroAction = { type: 'COMPLETE_SESSION' }
+      const afterWork = pomodoroReducer(
+        { ...afterSkip, timerState: 'completed' },
+        completeAction
+      )
+
+      expect(afterWork.pomodorosCompletedToday).toBe(5)
+      expect(afterWork.workSessionsToday).toBe(1)
+      expect(afterWork.currentSessionType).toBe('short-break') // Should be short break
+    })
+
+    it('should respect autoStartNextSession setting when skipping', () => {
+      const autoStartState: PomodoroState = {
+        ...initialState,
+        currentSessionType: 'work',
+        timerState: 'running',
+        pomodorosCompletedToday: 2,
+        settings: {
+          ...getDefaultSettings(),
+          autoStartNextSession: true,
+        },
+      }
+      const action: PomodoroAction = { type: 'SKIP_SESSION' }
       const newState = pomodoroReducer(autoStartState, action)
 
       expect(newState.timerState).toBe('running')
