@@ -155,4 +155,94 @@ describe('TimerControls', () => {
 
     expect(onNext).toHaveBeenCalledTimes(1)
   })
+
+  describe('Skip Button', () => {
+    it('should show skip button when onSkip is provided and timer is idle', () => {
+      render(
+        <TimerControls
+          timerState="idle"
+          onStart={vi.fn()}
+          onPause={vi.fn()}
+          onReset={vi.fn()}
+          onSkip={vi.fn()}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: /skip/i })).toBeInTheDocument()
+    })
+
+    it('should show skip button when onSkip is provided and timer is running', () => {
+      render(
+        <TimerControls
+          timerState="running"
+          onStart={vi.fn()}
+          onPause={vi.fn()}
+          onReset={vi.fn()}
+          onSkip={vi.fn()}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: /skip/i })).toBeInTheDocument()
+    })
+
+    it('should show skip button when onSkip is provided and timer is paused', () => {
+      render(
+        <TimerControls
+          timerState="paused"
+          onStart={vi.fn()}
+          onPause={vi.fn()}
+          onReset={vi.fn()}
+          onSkip={vi.fn()}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: /skip/i })).toBeInTheDocument()
+    })
+
+    it('should not show skip button when timer is completed', () => {
+      render(
+        <TimerControls
+          timerState="completed"
+          onStart={vi.fn()}
+          onPause={vi.fn()}
+          onReset={vi.fn()}
+          onSkip={vi.fn()}
+        />
+      )
+
+      expect(screen.queryByRole('button', { name: /^skip$/i })).not.toBeInTheDocument()
+    })
+
+    it('should not show skip button when onSkip is not provided', () => {
+      render(
+        <TimerControls
+          timerState="running"
+          onStart={vi.fn()}
+          onPause={vi.fn()}
+          onReset={vi.fn()}
+        />
+      )
+
+      expect(screen.queryByRole('button', { name: /^skip$/i })).not.toBeInTheDocument()
+    })
+
+    it('should call onSkip when skip button is clicked', async () => {
+      const user = userEvent.setup()
+      const onSkip = vi.fn()
+
+      render(
+        <TimerControls
+          timerState="running"
+          onStart={vi.fn()}
+          onPause={vi.fn()}
+          onReset={vi.fn()}
+          onSkip={onSkip}
+        />
+      )
+
+      await user.click(screen.getByRole('button', { name: /skip/i }))
+
+      expect(onSkip).toHaveBeenCalledTimes(1)
+    })
+  })
 })

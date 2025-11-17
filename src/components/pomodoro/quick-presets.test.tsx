@@ -4,94 +4,164 @@ import userEvent from '@testing-library/user-event'
 import { QuickPresets } from './quick-presets'
 
 describe('QuickPresets', () => {
-  it('should render all preset buttons', () => {
-    const onPresetSelect = vi.fn()
-    render(<QuickPresets currentWorkDuration={25 * 60} onPresetSelect={onPresetSelect} />)
+  const defaultProps = {
+    currentWorkDuration: 25 * 60,
+    currentShortBreakDuration: 5 * 60,
+    currentLongBreakDuration: 15 * 60,
+    onPresetSelect: vi.fn(),
+  }
 
-    expect(screen.getByRole('button', { name: '5 min' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '10 min' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '15 min' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '25 min' })).toBeInTheDocument()
+  describe('Work Session', () => {
+    it('should render 4 preset buttons for work session', () => {
+      render(<QuickPresets {...defaultProps} currentSessionType="work" />)
+
+      expect(screen.getByRole('button', { name: '5 min' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '10 min' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '15 min' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '25 min' })).toBeInTheDocument()
+    })
+
+    it('should highlight the currently active work duration preset', () => {
+      render(<QuickPresets {...defaultProps} currentSessionType="work" currentWorkDuration={10 * 60} />)
+
+      const tenMinButton = screen.getByRole('button', { name: '10 min' })
+      const fiveMinButton = screen.getByRole('button', { name: '5 min' })
+
+      // Active button should have default variant (bg-primary)
+      expect(tenMinButton.className).toContain('bg-primary')
+      // Inactive button should have outline variant (border border-input)
+      expect(fiveMinButton.className).toContain('border-input')
+    })
+
+    it('should call onPresetSelect with correct duration and session type for work', async () => {
+      const user = userEvent.setup()
+      const onPresetSelect = vi.fn()
+      render(<QuickPresets {...defaultProps} currentSessionType="work" onPresetSelect={onPresetSelect} />)
+
+      await user.click(screen.getByRole('button', { name: '15 min' }))
+
+      expect(onPresetSelect).toHaveBeenCalledWith(15, 'work')
+    })
+
+    it('should handle all work preset clicks correctly', async () => {
+      const user = userEvent.setup()
+      const onPresetSelect = vi.fn()
+      render(<QuickPresets {...defaultProps} currentSessionType="work" onPresetSelect={onPresetSelect} />)
+
+      await user.click(screen.getByRole('button', { name: '5 min' }))
+      expect(onPresetSelect).toHaveBeenCalledWith(5, 'work')
+
+      await user.click(screen.getByRole('button', { name: '10 min' }))
+      expect(onPresetSelect).toHaveBeenCalledWith(10, 'work')
+
+      await user.click(screen.getByRole('button', { name: '25 min' }))
+      expect(onPresetSelect).toHaveBeenCalledWith(25, 'work')
+
+      expect(onPresetSelect).toHaveBeenCalledTimes(3)
+    })
   })
 
-  it('should highlight the currently active preset', () => {
-    const onPresetSelect = vi.fn()
-    render(<QuickPresets currentWorkDuration={10 * 60} onPresetSelect={onPresetSelect} />)
+  describe('Short Break Session', () => {
+    it('should render 3 preset buttons for short break session', () => {
+      render(<QuickPresets {...defaultProps} currentSessionType="short-break" />)
 
-    const tenMinButton = screen.getByRole('button', { name: '10 min' })
-    const fiveMinButton = screen.getByRole('button', { name: '5 min' })
+      expect(screen.getByRole('button', { name: '5 min' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '10 min' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '15 min' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: '25 min' })).not.toBeInTheDocument()
+    })
 
-    // Active button should have default variant (bg-primary)
-    expect(tenMinButton.className).toContain('bg-primary')
-    // Inactive button should have outline variant (border border-input)
-    expect(fiveMinButton.className).toContain('border-input')
+    it('should highlight the currently active short break duration preset', () => {
+      render(
+        <QuickPresets {...defaultProps} currentSessionType="short-break" currentShortBreakDuration={10 * 60} />
+      )
+
+      const tenMinButton = screen.getByRole('button', { name: '10 min' })
+      const fiveMinButton = screen.getByRole('button', { name: '5 min' })
+
+      expect(tenMinButton.className).toContain('bg-primary')
+      expect(fiveMinButton.className).toContain('border-input')
+    })
+
+    it('should call onPresetSelect with correct duration and session type for short break', async () => {
+      const user = userEvent.setup()
+      const onPresetSelect = vi.fn()
+      render(<QuickPresets {...defaultProps} currentSessionType="short-break" onPresetSelect={onPresetSelect} />)
+
+      await user.click(screen.getByRole('button', { name: '10 min' }))
+
+      expect(onPresetSelect).toHaveBeenCalledWith(10, 'short-break')
+    })
   })
 
-  it('should call onPresetSelect with correct duration when preset is clicked', async () => {
-    const user = userEvent.setup()
-    const onPresetSelect = vi.fn()
-    render(<QuickPresets currentWorkDuration={25 * 60} onPresetSelect={onPresetSelect} />)
+  describe('Long Break Session', () => {
+    it('should render 3 preset buttons for long break session', () => {
+      render(<QuickPresets {...defaultProps} currentSessionType="long-break" />)
 
-    await user.click(screen.getByRole('button', { name: '15 min' }))
+      expect(screen.getByRole('button', { name: '5 min' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '10 min' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '15 min' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: '25 min' })).not.toBeInTheDocument()
+    })
 
-    expect(onPresetSelect).toHaveBeenCalledWith(15)
+    it('should highlight the currently active long break duration preset', () => {
+      render(<QuickPresets {...defaultProps} currentSessionType="long-break" currentLongBreakDuration={15 * 60} />)
+
+      const fifteenMinButton = screen.getByRole('button', { name: '15 min' })
+      const fiveMinButton = screen.getByRole('button', { name: '5 min' })
+
+      expect(fifteenMinButton.className).toContain('bg-primary')
+      expect(fiveMinButton.className).toContain('border-input')
+    })
+
+    it('should call onPresetSelect with correct duration and session type for long break', async () => {
+      const user = userEvent.setup()
+      const onPresetSelect = vi.fn()
+      render(<QuickPresets {...defaultProps} currentSessionType="long-break" onPresetSelect={onPresetSelect} />)
+
+      await user.click(screen.getByRole('button', { name: '15 min' }))
+
+      expect(onPresetSelect).toHaveBeenCalledWith(15, 'long-break')
+    })
   })
 
-  it('should handle all preset clicks correctly', async () => {
-    const user = userEvent.setup()
-    const onPresetSelect = vi.fn()
-    render(<QuickPresets currentWorkDuration={25 * 60} onPresetSelect={onPresetSelect} />)
+  describe('Disabled State', () => {
+    it('should disable all buttons when disabled prop is true', () => {
+      render(<QuickPresets {...defaultProps} currentSessionType="work" disabled={true} />)
 
-    await user.click(screen.getByRole('button', { name: '5 min' }))
-    expect(onPresetSelect).toHaveBeenCalledWith(5)
+      expect(screen.getByRole('button', { name: '5 min' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: '10 min' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: '15 min' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: '25 min' })).toBeDisabled()
+    })
 
-    await user.click(screen.getByRole('button', { name: '10 min' }))
-    expect(onPresetSelect).toHaveBeenCalledWith(10)
+    it('should not call onPresetSelect when button is disabled', async () => {
+      const user = userEvent.setup()
+      const onPresetSelect = vi.fn()
+      render(<QuickPresets {...defaultProps} currentSessionType="work" onPresetSelect={onPresetSelect} disabled={true} />)
 
-    await user.click(screen.getByRole('button', { name: '15 min' }))
-    expect(onPresetSelect).toHaveBeenCalledWith(15)
+      await user.click(screen.getByRole('button', { name: '10 min' }))
 
-    expect(onPresetSelect).toHaveBeenCalledTimes(3)
+      expect(onPresetSelect).not.toHaveBeenCalled()
+    })
   })
 
-  it('should round current duration to nearest minute for highlighting', () => {
-    const onPresetSelect = vi.fn()
-    // 10 minutes and 30 seconds should round to 11, so 10 min preset should not be active
-    render(<QuickPresets currentWorkDuration={10 * 60 + 30} onPresetSelect={onPresetSelect} />)
+  describe('Duration Highlighting', () => {
+    it('should round current duration to nearest minute for highlighting', () => {
+      // 10 minutes and 30 seconds should round to 11, so 10 min preset should not be active
+      render(<QuickPresets {...defaultProps} currentSessionType="work" currentWorkDuration={10 * 60 + 30} />)
 
-    const tenMinButton = screen.getByRole('button', { name: '10 min' })
-    // Should not be active because 10.5 minutes rounds to 11
-    expect(tenMinButton.className).toContain('border-input')
-  })
+      const tenMinButton = screen.getByRole('button', { name: '10 min' })
+      expect(tenMinButton.className).toContain('border-input')
+    })
 
-  it('should highlight no preset when current duration does not match any preset', () => {
-    const onPresetSelect = vi.fn()
-    render(<QuickPresets currentWorkDuration={30 * 60} onPresetSelect={onPresetSelect} />)
+    it('should highlight no preset when current duration does not match any preset', () => {
+      render(<QuickPresets {...defaultProps} currentSessionType="work" currentWorkDuration={30 * 60} />)
 
-    // All buttons should have outline variant (none active)
-    expect(screen.getByRole('button', { name: '5 min' }).className).toContain('border-input')
-    expect(screen.getByRole('button', { name: '10 min' }).className).toContain('border-input')
-    expect(screen.getByRole('button', { name: '15 min' }).className).toContain('border-input')
-    expect(screen.getByRole('button', { name: '25 min' }).className).toContain('border-input')
-  })
-
-  it('should disable all buttons when disabled prop is true', () => {
-    const onPresetSelect = vi.fn()
-    render(<QuickPresets currentWorkDuration={25 * 60} onPresetSelect={onPresetSelect} disabled={true} />)
-
-    expect(screen.getByRole('button', { name: '5 min' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: '10 min' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: '15 min' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: '25 min' })).toBeDisabled()
-  })
-
-  it('should not call onPresetSelect when button is disabled', async () => {
-    const user = userEvent.setup()
-    const onPresetSelect = vi.fn()
-    render(<QuickPresets currentWorkDuration={25 * 60} onPresetSelect={onPresetSelect} disabled={true} />)
-
-    await user.click(screen.getByRole('button', { name: '10 min' }))
-
-    expect(onPresetSelect).not.toHaveBeenCalled()
+      expect(screen.getByRole('button', { name: '5 min' }).className).toContain('border-input')
+      expect(screen.getByRole('button', { name: '10 min' }).className).toContain('border-input')
+      expect(screen.getByRole('button', { name: '15 min' }).className).toContain('border-input')
+      expect(screen.getByRole('button', { name: '25 min' }).className).toContain('border-input')
+    })
   })
 })

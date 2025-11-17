@@ -8,6 +8,7 @@ type TimerControlsProps = {
   onPause: () => void
   onReset: () => void
   onNext?: () => void
+  onSkip?: () => void
 }
 
 export function TimerControls({
@@ -16,6 +17,7 @@ export function TimerControls({
   onPause,
   onReset,
   onNext,
+  onSkip,
 }: TimerControlsProps) {
   const isIdle = timerState === 'idle'
   const isRunning = timerState === 'running'
@@ -48,6 +50,14 @@ export function TimerControls({
             </Button>
           )}
         </>
+      )}
+
+      {/* Skip Button */}
+      {onSkip && !isCompleted && (
+        <Button size="lg" variant="outline" onClick={onSkip} className="min-w-32">
+          <SkipForward className="mr-2" />
+          Skip
+        </Button>
       )}
 
       {/* Reset Button */}

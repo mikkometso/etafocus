@@ -5,7 +5,7 @@ import { TimerDisplay } from './timer-display'
 import { TimerControls } from './timer-controls'
 import { SessionInfo } from './session-info'
 import { QuickPresets } from './quick-presets'
-import type { PomodoroSettings } from '@/features/pomodoro/types/pomodoro'
+import type { PomodoroSettings, SessionType } from '@/features/pomodoro/types/pomodoro'
 
 export function PomodoroPage() {
   const { state, dispatch } = usePomodoro()
@@ -46,11 +46,26 @@ export function PomodoroPage() {
     dispatch({ type: 'COMPLETE_SESSION' })
   }
 
-  const handlePresetSelect = (durationInMinutes: number) => {
-    const newSettings: PomodoroSettings = {
-      ...state.settings,
-      workDuration: durationInMinutes * 60, // Convert minutes to seconds
+  const handleSkip = () => {
+    dispatch({ type: 'SKIP_SESSION' })
+  }
+
+  const handlePresetSelect = (durationInMinutes: number, sessionType: SessionType) => {
+    const newSettings: PomodoroSettings = { ...state.settings }
+
+    // Update the appropriate duration based on session type
+    switch (sessionType) {
+      case 'work':
+        newSettings.workDuration = durationInMinutes * 60
+        break
+      case 'short-break':
+        newSettings.shortBreakDuration = durationInMinutes * 60
+        break
+      case 'long-break':
+        newSettings.longBreakDuration = durationInMinutes * 60
+        break
     }
+
     dispatch({ type: 'UPDATE_SETTINGS', payload: newSettings })
     dispatch({ type: 'RESET_TIMER' })
   }
@@ -75,7 +90,10 @@ export function PomodoroPage() {
 
         {/* Quick Presets */}
         <QuickPresets
+          currentSessionType={state.currentSessionType}
           currentWorkDuration={state.settings.workDuration}
+          currentShortBreakDuration={state.settings.shortBreakDuration}
+          currentLongBreakDuration={state.settings.longBreakDuration}
           onPresetSelect={handlePresetSelect}
           disabled={state.timerState === 'running'}
         />
@@ -87,6 +105,7 @@ export function PomodoroPage() {
           onPause={handlePause}
           onReset={handleReset}
           onNext={state.timerState === 'completed' ? handleNext : undefined}
+          onSkip={handleSkip}
         />
 
         {/* Session Info */}
