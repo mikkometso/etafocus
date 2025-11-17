@@ -4,6 +4,8 @@ import { calculateNextSessionType, getDurationForSessionType } from '@/features/
 import { TimerDisplay } from './timer-display'
 import { TimerControls } from './timer-controls'
 import { SessionInfo } from './session-info'
+import { QuickPresets } from './quick-presets'
+import type { PomodoroSettings, SessionType } from '@/features/pomodoro/types/pomodoro'
 
 export function PomodoroPage() {
   const { state, dispatch } = usePomodoro()
@@ -44,6 +46,30 @@ export function PomodoroPage() {
     dispatch({ type: 'COMPLETE_SESSION' })
   }
 
+  const handleSkip = () => {
+    dispatch({ type: 'SKIP_SESSION' })
+  }
+
+  const handlePresetSelect = (durationInMinutes: number, sessionType: SessionType) => {
+    const newSettings: PomodoroSettings = { ...state.settings }
+
+    // Update the appropriate duration based on session type
+    switch (sessionType) {
+      case 'work':
+        newSettings.workDuration = durationInMinutes * 60
+        break
+      case 'short-break':
+        newSettings.shortBreakDuration = durationInMinutes * 60
+        break
+      case 'long-break':
+        newSettings.longBreakDuration = durationInMinutes * 60
+        break
+    }
+
+    dispatch({ type: 'UPDATE_SETTINGS', payload: newSettings })
+    dispatch({ type: 'RESET_TIMER' })
+  }
+
   return (
     <div className="container mx-auto max-w-4xl p-8">
       <div className="flex flex-col gap-12">
@@ -62,6 +88,16 @@ export function PomodoroPage() {
           progress={progress}
         />
 
+        {/* Quick Presets */}
+        <QuickPresets
+          currentSessionType={state.currentSessionType}
+          currentWorkDuration={state.settings.workDuration}
+          currentShortBreakDuration={state.settings.shortBreakDuration}
+          currentLongBreakDuration={state.settings.longBreakDuration}
+          onPresetSelect={handlePresetSelect}
+          disabled={state.timerState === 'running'}
+        />
+
         {/* Timer Controls */}
         <TimerControls
           timerState={state.timerState}
@@ -69,6 +105,7 @@ export function PomodoroPage() {
           onPause={handlePause}
           onReset={handleReset}
           onNext={state.timerState === 'completed' ? handleNext : undefined}
+          onSkip={handleSkip}
         />
 
         {/* Session Info */}

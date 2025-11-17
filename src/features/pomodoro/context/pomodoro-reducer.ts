@@ -7,6 +7,7 @@ export type PomodoroAction =
   | { type: 'RESET_TIMER' }
   | { type: 'TICK' }
   | { type: 'COMPLETE_SESSION' }
+  | { type: 'SKIP_SESSION' }
   | { type: 'UPDATE_SETTINGS'; payload: PomodoroSettings }
 
 export function pomodoroReducer(
@@ -47,16 +48,21 @@ export function pomodoroReducer(
     }
 
     case 'COMPLETE_SESSION': {
-      // Increment pomodoros only if completing a work session
+      // Increment both counters when completing a work session
       const newPomodorosCompleted =
         state.currentSessionType === 'work'
           ? state.pomodorosCompletedToday + 1
           : state.pomodorosCompletedToday
 
-      // Calculate next session type
+      const newWorkSessions =
+        state.currentSessionType === 'work'
+          ? state.workSessionsToday + 1
+          : state.workSessionsToday
+
+      // Use workSessionsToday for long break calculation
       const nextSessionType = calculateNextSessionType(
         state.currentSessionType,
-        newPomodorosCompleted,
+        newWorkSessions,
         state.settings.longBreakInterval
       )
 
@@ -70,6 +76,40 @@ export function pomodoroReducer(
         ...state,
         currentSessionType: nextSessionType,
         pomodorosCompletedToday: newPomodorosCompleted,
+        workSessionsToday: newWorkSessions,
+        timeRemaining: nextDuration,
+        timerState: nextTimerState,
+      }
+    }
+
+    case 'SKIP_SESSION': {
+      // Increment workSessionsToday when skipping work (for long break calculation)
+      // But don't increment pomodorosCompletedToday (only for actual completions)
+      const newWorkSessions =
+        state.currentSessionType === 'work'
+          ? state.workSessionsToday + 1
+          : state.currentSessionType === 'long-break'
+          ? 0 // Reset after skipping long break
+          : state.workSessionsToday
+
+      // Calculate next session type using workSessionsToday
+      const nextSessionType = calculateNextSessionType(
+        state.currentSessionType,
+        newWorkSessions,
+        state.settings.longBreakInterval
+      )
+
+      // Get duration for next session
+      const nextDuration = getDurationForSessionType(nextSessionType, state.settings)
+
+      // Determine next timer state based on auto-start setting
+      const nextTimerState = state.settings.autoStartNextSession ? 'running' : 'idle'
+
+      return {
+        ...state,
+        currentSessionType: nextSessionType,
+        pomodorosCompletedToday: state.pomodorosCompletedToday, // Unchanged
+        workSessionsToday: newWorkSessions,
         timeRemaining: nextDuration,
         timerState: nextTimerState,
       }

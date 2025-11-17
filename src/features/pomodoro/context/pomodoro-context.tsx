@@ -17,10 +17,15 @@ type PomodoroProviderProps = {
 
 function getInitialState(): PomodoroState {
   // Try to load state from localStorage
-  const savedState = LocalStorage.get<PomodoroState>(StorageKeys.POMODORO_STATE)
+  const savedState = LocalStorage.get<Partial<PomodoroState>>(StorageKeys.POMODORO_STATE)
 
   if (savedState) {
-    return savedState
+    // Migration: Add workSessionsToday if it doesn't exist
+    const migratedState: PomodoroState = {
+      ...savedState,
+      workSessionsToday: savedState.workSessionsToday ?? savedState.pomodorosCompletedToday ?? 0,
+    } as PomodoroState
+    return migratedState
   }
 
   // Return default state
@@ -30,6 +35,7 @@ function getInitialState(): PomodoroState {
     timerState: 'idle',
     timeRemaining: defaultSettings.workDuration,
     pomodorosCompletedToday: 0,
+    workSessionsToday: 0,
     currentStreak: 0,
     sessions: [],
     settings: defaultSettings,
