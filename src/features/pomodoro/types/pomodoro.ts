@@ -26,7 +26,8 @@ export type PomodoroState = {
   currentSessionType: SessionType
   timerState: TimerState
   timeRemaining: number // in seconds
-  pomodorosCompletedToday: number
+  pomodorosCompletedToday: number // Only increments when completing work sessions
+  workSessionsToday: number // Increments for both completed and skipped work sessions
   currentStreak: number
   sessions: PomodoroSession[]
   settings: PomodoroSettings
