@@ -87,6 +87,11 @@ See `claude.md` for detailed project structure and development guidelines.
   - Skip any session (work or break) to move to the next
   - Skipping long break resets cycle to ensure next break is short
   - Respects auto-start settings
+- **Sound & Notification Alerts**
+  - Built-in browser sounds (default, beep, chime) when sessions complete
+  - Browser popup notifications for session completion
+  - Configurable sound types and enable/disable toggles
+  - Web Audio API and Notification API integration
 - **Auto-transitions** between work and break sessions
 - **localStorage persistence** - your progress is saved
 - **Light/dark theme** support
@@ -97,7 +102,6 @@ See `claude.md` for detailed project structure and development guidelines.
 - Todo list with task tracking
 - Link todos to pomodoro sessions
 - Statistics and analytics dashboard
-- Sound alerts and notifications
 - Keyboard shortcuts
 
 ## Deployment

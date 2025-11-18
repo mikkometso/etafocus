@@ -20,10 +20,14 @@ function getInitialState(): PomodoroState {
   const savedState = LocalStorage.get<Partial<PomodoroState>>(StorageKeys.POMODORO_STATE)
 
   if (savedState) {
-    // Migration: Add workSessionsToday if it doesn't exist
+    // Migration: Add missing fields if they don't exist
     const migratedState: PomodoroState = {
       ...savedState,
       workSessionsToday: savedState.workSessionsToday ?? savedState.pomodorosCompletedToday ?? 0,
+      settings: {
+        ...savedState.settings,
+        soundDuration: savedState.settings?.soundDuration ?? 1,
+      },
     } as PomodoroState
     return migratedState
   }
