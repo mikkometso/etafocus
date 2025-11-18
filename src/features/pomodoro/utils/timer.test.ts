@@ -17,6 +17,7 @@ describe('timer utilities', () => {
     soundEnabled: true,
     notificationEnabled: true,
     soundSelection: 'default',
+    soundDuration: 1,
   }
 
   describe('calculateNextSessionType', () => {

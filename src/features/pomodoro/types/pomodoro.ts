@@ -11,6 +11,7 @@ export type PomodoroSettings = {
   soundEnabled: boolean
   notificationEnabled: boolean
   soundSelection: string
+  soundDuration: number // sound length in seconds (1, 2, or 3)
 }
 
 export type PomodoroSession = {

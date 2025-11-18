@@ -1,10 +1,12 @@
 import { usePomodoro } from '@/features/pomodoro/context/pomodoro-context'
 import { useTimer } from '@/features/pomodoro/hooks/use-timer'
+import { usePomodoroNotifications } from '@/features/pomodoro/hooks/use-pomodoro-notifications'
 import { calculateNextSessionType, getDurationForSessionType } from '@/features/pomodoro/utils/timer'
 import { TimerDisplay } from './timer-display'
 import { TimerControls } from './timer-controls'
 import { SessionInfo } from './session-info'
 import { QuickPresets } from './quick-presets'
+import { SettingsDialog } from './settings-dialog'
 import type { PomodoroSettings, SessionType } from '@/features/pomodoro/types/pomodoro'
 
 export function PomodoroPage() {
@@ -28,6 +30,9 @@ export function PomodoroPage() {
       dispatch({ type: 'TICK' })
     },
   })
+
+  // Notifications hook - plays sound and shows notifications on session complete
+  usePomodoroNotifications({ state })
 
   // Handlers
   const handleStart = () => {
@@ -74,7 +79,10 @@ export function PomodoroPage() {
     <div className="container mx-auto max-w-4xl p-8">
       <div className="flex flex-col gap-12">
         {/* Header */}
-        <div className="text-center">
+        <div className="relative text-center">
+          <div className="absolute right-0 top-0">
+            <SettingsDialog />
+          </div>
           <h1 className="text-3xl font-bold">Pomodoro Timer</h1>
           <p className="mt-2 text-muted-foreground">
             Stay focused and productive with the Pomodoro Technique

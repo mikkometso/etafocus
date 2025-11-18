@@ -51,6 +51,7 @@ export function getDefaultSettings(): PomodoroSettings {
     soundEnabled: true,
     notificationEnabled: false,
     soundSelection: 'default',
+    soundDuration: 1,
   }
 }
 
